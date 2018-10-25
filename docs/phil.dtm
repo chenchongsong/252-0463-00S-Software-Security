@@ -1,5 +1,4 @@
-
-entity PERSON {
+entity Person {
 	String name
 	String surname
 	String password
@@ -38,11 +37,10 @@ entity Event {
 	Set(Person) requestSenders
 		oppositeTo requestedEvents
 	Set(Category) categoriesBelongTo
-		oppositeTo categoryEvents
+		oppositeTo categorisedEvents
 	Set(Invitation) invitations
 		oppositeTo eventInvitedTo
 }
-
 
 entity Category {
 	String name
@@ -51,7 +49,7 @@ entity Category {
 		oppositeTo categoriesSubscribed
 	Set(Person) categoryModerators
 		oppositeTo categoriesModerated
-	Set(Event) categoryEvents
+	Set(Event) categorisedEvents
 		oppositeTo categoriesBelongTo
 }
 
@@ -61,9 +59,8 @@ entity Invitation {
 	Person invitationReceiver
 		oppositeTo invitationsReceived
 	Event eventInvitedTo
-		oppositeTo eventInvitedTo
+		oppositeTo invitations
 }
-
 
 enum Role {
 	FREE_USER
