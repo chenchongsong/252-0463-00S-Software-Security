@@ -13,7 +13,7 @@ entity Person {
     Set(Invitation) invitationsReceived oppositeTo invitationReceiver
 
     Set(Category) categoriesSubscribed oppositeTo categorySubscribers
-    Set (Category) categoriesModerated oppositeTo categoryModerators
+    Set(Category) categoriesModerated oppositeTo categoryModerators
 }
 
 entity Event {
@@ -24,7 +24,7 @@ entity Event {
 
     Person eventOwner oppositeTo createdEvents
     Set(Person) eventManagers oppositeTo managedEvents
-    Set(Person) eventAttendees oppositeTo attendEvents
+    Set(Person) eventAttendees oppositeTo attendedEvents
 
     Set(Person) requestSenders oppositeTo requestedEvents
     Set(Invitation) invitations oppositeTo eventInvitedTo
