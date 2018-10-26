@@ -1,54 +1,54 @@
 entity Person {
-	String name
-	String surname
-	String password
-	Role personalRole
+    String name
+    String surname
+    String password
+    Role personalRole
 
-	Set(Event) createdEvents oppositeTo eventOwner
-	Set(Event) managedEvents oppositeTo eventManagers
-	Set(Event) attendedEvents oppositeTo eventAttendees
-	Set(Event) requestedEvents oppositeTo requestSenders
+    Set(Event) createdEvents oppositeTo eventOwner
+    Set(Event) managedEvents oppositeTo eventManagers
+    Set(Event) attendedEvents oppositeTo eventAttendees
+    Set(Event) requestedEvents oppositeTo requestSenders
 
-	Set(Invitation) invitationsSent oppositeTo invitationSender
-	Set(Invitation) invitationsReceived oppositeTo invitationReceiver
+    Set(Invitation) invitationsSent oppositeTo invitationSender
+    Set(Invitation) invitationsReceived oppositeTo invitationReceiver
 
-	Set(Category) categoriesSubscribed oppositeTo categorySubscribers
-	Set (Category) categoriesModerated oppositeTo categoryModerators
+    Set(Category) categoriesSubscribed oppositeTo categorySubscribers
+    Set (Category) categoriesModerated oppositeTo categoryModerators
 }
 
 entity Event {
-	String title
-	String description
-	LocalDateTime time
-	LocalDate date
+    String title
+    String description
+    LocalDateTime time
+    LocalDate date
 
-	Person eventOwner oppositeTo createdEvents
-	Set(Person) eventManagers oppositeTo managedEvents
-	Set(Person) eventAttendees oppositeTo attendEvents
+    Person eventOwner oppositeTo createdEvents
+    Set(Person) eventManagers oppositeTo managedEvents
+    Set(Person) eventAttendees oppositeTo attendEvents
 
-	Set(Person) requestSenders oppositeTo requestedEvents
-	Set(Invitation) invitations oppositeTo eventInvitedTo
+    Set(Person) requestSenders oppositeTo requestedEvents
+    Set(Invitation) invitations oppositeTo eventInvitedTo
 
-	Set(Category) categoriesBelongTo oppositeTo categorisedEvents
+    Set(Category) categoriesBelongTo oppositeTo categorisedEvents
 }
 
 entity Category {
-	String name
-	
-	Set(Person) categorySubscribers oppositeTo categoriesSubscribed
-	Set(Person) categoryModerators oppositeTo categoriesModerated
-	Set(Event) categorisedEvents oppositeTo categoriesBelongTo
+    String name
+    
+    Set(Person) categorySubscribers oppositeTo categoriesSubscribed
+    Set(Person) categoryModerators oppositeTo categoriesModerated
+    Set(Event) categorisedEvents oppositeTo categoriesBelongTo
 }
 
 entity Invitation {
-	Person invitationSender oppositeTo invitationsSent
-	Person invitationReceiver oppositeTo invitationsReceived
-	Event eventInvitedTo oppositeTo invitations
+    Person invitationSender oppositeTo invitationsSent
+    Person invitationReceiver oppositeTo invitationsReceived
+    Event eventInvitedTo oppositeTo invitations
 }
 
 enum Role {
-	FREE_USER
-	PREMIMIUM_USER
-	MODERATOR
-	ADMINISTRATOR
+    FREE_USER
+    PREMIMIUM_USER
+    MODERATOR
+    ADMINISTRATOR
 }
