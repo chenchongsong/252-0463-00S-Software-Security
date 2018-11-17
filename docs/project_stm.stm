@@ -1,0 +1,91 @@
+role FREEUSER{
+    Person{
+        //1.1
+        read(name)
+        read(surname)
+        read(username)
+        read(role)
+        //1.2
+        read(subscriptions) constrainedBy[self = caller]
+        //1.3
+        update(name) constrainedBy [self=caller]
+        update(surname) constrainedBy [self=caller]
+        update(password) constrainedBy[self=caller]
+        //1.4
+        add(subscriptions) constrainedBy [self = caller and self.subscriptions-> size() < 3]
+        
+        //1.5
+        remove(subscriptions) constrainedBy[self = caller and self.subscriptions-> size() < 1]
+        
+        //1.6
+        read(attends) constrainedBy[self=caller]
+        
+        //1.7
+        //remove(attends) constrainedBy[self = caller and self.attends]
+    }
+    Event{
+        fullAccess
+    }
+    Category{
+        //1.4
+        add(subscribers) constrainedBy[target = caller and target.subscriptions->size() < 3]
+     
+        //1.5
+        remove(subscribers) constrainedBy[target = caller and target.subscriptions->size() < 1]
+    }
+    Invite{
+        fullAccess
+    }
+}
+
+role PREMIUMUSER{
+    Person{
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category {
+        fullAccess
+    }
+    Invite{
+        fullAccess
+    }
+}
+role MODERATOR{
+    Person{
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category{
+        fullAccess
+    }
+    Invite{
+        fullAccess
+    }
+}
+role ADMIN{
+    Person{
+        fullAccess
+    }
+    Event{
+        fullAccess
+    }
+    Category{
+        fullAccess
+    }
+    Invite{
+        fullAccess
+    }
+}
+
+//Necessary for the login procedure. Do not change.
+role SYSTEM{
+    Person{
+        read(username)
+        read(password)
+        read(role)
+    }
+}
