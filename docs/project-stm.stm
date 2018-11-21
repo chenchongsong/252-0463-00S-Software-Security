@@ -1,34 +1,36 @@
 role FREEUSER{
     Person{
-        //1.1
+        //1.1 read any user’s name, surname, role, and username
         read(name), read(surname), read(username), read(role)
-        //1.2
+        //1.2 for any user, read a list of their subscriptions
         read(subscriptions)
-        //1.3
+        //1.3 edit their own name, surname, and password
         update(name) constrainedBy[self = caller]
         update(surname) constrainedBy[self = caller]
         update(password) constrainedBy[self = caller]
         
-        //1.4
-        add(subscriptions) constrainedBy[self = caller and self.subscriptions-> size() < 3]
-        //1.5
-        remove(subscriptions) constrainedBy[self = caller]
-        
-        //1.6
+        //1.6 read a list of events attended
         read(attends) constrainedBy[self = caller]
-        //1.7
+        //1.7 leave an event attended
         remove(attends) constrainedBy[self = caller and target.owner <> caller]
 
-        //1.9 (upon acceptance of invitation)
+        //1.9 (upon acceptance/rejection of invitation)
         read(invitations) constrainedBy[self = caller]
-        add(attends) constrainedBy[self = caller and (self.invitations->exists(i|i.event=target) or target.attendants->size() = 0)]
+        add(attends) constrainedBy[
+            self = caller and
+            (self.invitations->exists(i|i.event=target) or target.attendants->size() = 0) and
+            not (target.owner.role = Role::FREEUSER and target.attendants->size()+target.invitations->size() > 4)
+        ]
+        // Before a user accept an invitation,
+        // target.attendants->size()+target.invitations->size() can sum up to 4,
+        // so a ">" sign is used here
 
-        //1.10 1.11
+        //1.10 1.11 read a list of events they manage/own
         read(manages), read(events) constrainedBy[self = caller]
 
-        //1.16
+        //1.16 request to attend an event
         add(requests) constrainedBy[self = caller]
-        //1.17
+        //1.17 read a list of their own pending requests
         read(requests) constrainedBy[self = caller]
 
         //1.21 after a freeuser creates his own event
@@ -36,20 +38,16 @@ role FREEUSER{
         add(manages) constrainedBy[self = caller and target.managedBy->size() = 0]
     }
     Event{
-        //1.7
-        remove(attendants) constrainedBy[target = caller and self.owner <> caller]
         
-        //1.12
+        //1.12 1.3 read event details
         read(title), read(description), read(lat), read(lon),
         read(date), read(hour), read(min)
-
-        //1.13
         read(owner), read(categories)
 
-        //1.14
+        //1.14 read a list of event attendants if attending
         read(attendants) constrainedBy[self.attendants->includes(caller)]
 
-        //1.15
+        //1.15 as an event manager...
         read(invitations) constrainedBy[self.managedBy->includes(caller)]
         add(categories), remove(categories) constrainedBy[self.managedBy->size() = 0 or self.managedBy->includes(caller)] // relax for initialization
         update(title) constrainedBy[self.title = null or self.managedBy->includes(caller)]
@@ -61,36 +59,43 @@ role FREEUSER{
         update(min) constrainedBy[self.min = null or self.managedBy->includes(caller)]
         read(managedBy) constrainedBy[self.managedBy->includes(caller)]
         read(requesters), remove(requesters) constrainedBy[self.managedBy->includes(caller)]
-        add(attendants) constrainedBy[self.managedBy->includes(caller) and self.requesters->includes(target)]
+        add(attendants) constrainedBy[
+            self.managedBy->includes(caller) and
+            self.requesters->includes(target) and
+            not (self.owner.role = Role::FREEUSER and self.attendants->size()+self.invitations->size() >= 4)
+        ] // accept a request
 
-        //1.16
+        //1.16 request to attend an event
         add(requesters) constrainedBy[target = caller]
 
-        //1.21
+        //1.21 create an event
         create constrainedBy[caller.events->size() < 5]
     }
     Category{
-        //1.4
+        //1.4 1.5 subscribe/unsubscribe
         add(subscribers) constrainedBy[target = caller and target.subscriptions->size() < 3]
-        //1.5
         remove(subscribers) constrainedBy[target = caller]
 
-        //1.18 1.19
+        //1.18 1.19 read the name of category and events related
         read(name), read(events)
-        //1.20
+        //1.20 read lists of categories' subscribers and moderators
         read(subscribers), read(moderators) constrainedBy[self.subscribers->includes(caller)]
         
     }
     Invite{
-        //1.8
+        //1.8 read a list of events they are currently invited to and who invited them
         read(invitedBy), read(event), read(invitee) constrainedBy[self.invitee = caller or self.invitedBy = caller]
 
-        //1.9
+        //1.9 (after acceptance/rejection of invitation)
         delete constrainedBy[self.invitee = caller]
 
-        //1.15
+        //1.15 create an event, and then do one-time initialization
         create
-        update(event) constrainedBy[self.event = null and value.managedBy->includes(caller)]
+        update(event) constrainedBy[
+            self.event = null and
+            value.managedBy->includes(caller) and
+            not (value.owner.role = Role::FREEUSER and value.attendants->size()+value.invitations->size() >= 4)
+        ]
         update(invitedBy) constrainedBy[self.invitedBy = null and value = caller]
         update(invitee) constrainedBy[self.invitee = null]
     }
