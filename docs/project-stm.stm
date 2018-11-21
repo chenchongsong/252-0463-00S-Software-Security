@@ -100,49 +100,57 @@ role FREEUSER{
         update(invitee) constrainedBy[self.invitee = null]
     }
 }
-
 role PREMIUMUSER extends FREEUSER{
     Person{
-        fullAccess
+        //2.1
+        add(subscriptions) constrainedBy[self=caller]
     }
     Event{
+        //2.2
+        create
         //2.3
-        
-        //add(managedBy) constrainedBy[self.owner = caller]
+        add(managedBy),remove(managedBy) constrainedBy[self.owner = caller]
+        //2.4
+        read(attendants)
     }
     Category {
-        fullAccess
+        //2.1
+        add(subscribers) constrainedBy[target = caller]
+        
     }
     Invite{
-        fullAccess
     }
 }
-role MODERATOR{
+
+role MODERATOR extends PREMIUMUSER{
     Person{
-        fullAccess
+        read(moderates) constrainedBy[self = caller]
     }
     Event{
-        fullAccess
+        update(title), update(description) constrainedBy[self.categories ->intersection(caller.moderates) -> size() <> 0]
     }
     Category{
-        fullAccess
+        
     }
     Invite{
-        fullAccess
+        
     }
 }
-role ADMIN{
+role ADMIN extends MODERATOR{
     Person{
-        fullAccess
+        create
+        update(name), update(username), update(surname), update(password), update(role)
     }
     Event{
-        fullAccess
     }
     Category{
-        fullAccess
+        create
+        update(name)
+        read(moderators)
+        add(moderators)
+        remove(moderators)
     }
     Invite{
-        fullAccess
     }
 }
 
@@ -154,4 +162,3 @@ role SYSTEM{
         read(role)
     }
 }
-
