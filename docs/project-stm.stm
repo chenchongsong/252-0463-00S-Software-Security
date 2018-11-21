@@ -104,6 +104,8 @@ role PREMIUMUSER extends FREEUSER{
     Person{
         //2.1
         add(subscriptions) constrainedBy[self=caller]
+        //2.5
+        add(attend)
     }
     Event{
         //2.2
