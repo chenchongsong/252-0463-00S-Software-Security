@@ -1,0 +1,133 @@
+Window EventQueryWindow{
+
+    Label Text1_L {
+        String text := ['Search for all events that I ']
+    }
+    ComboBox Events_CB {
+        //TODO: define all the options
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        Set(String) rows := [Set{"am attending", "was invited","requested to join"}]
+        String selected  := [null]
+        Label times { 
+            event onView (text) {
+                try{
+                    text :=[$Events_CB.row$]
+                } catch (SecurityException){
+                    text := ['RESTRICTED']
+                }
+            }
+        }
+    }
+    Label Text2_L {
+        String text := ['where at least']
+    }
+    
+    TextField Param_TF{
+        String text := [null]
+    }
+
+    Label Text3_L {
+        String text := ['person/people from the following group']
+    }
+    Table Table_People_T{
+        //TODO: show all people
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        Set(Person) rows := [Person.allInstances()]
+        Set(Person) selected  := [null]
+        columns {
+            ['People'] : Label username {
+                event onView (text){
+                    try{
+                        text := [$Table_People_T.row$.name + " " + $Table_People_T.row$.surname]
+                    } catch (SecurityException){
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+
+    Label Text4_L {
+        String text := ["is/are among the event's"]
+    }
+     
+    ComboBox Role_CB {
+        //TODO: define all the options
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        
+        Set(String) rows := [Set{"attendants", "managers", "owners"}]
+        String selected  := [null]
+        Label times { 
+            event onView (text) {
+                try{
+                    //TODO: show each option
+                    text :=[$Role_CB.row$]
+                } catch (SecurityException){
+                    text := ['RESTRICTED']
+                }
+            }
+        }
+    }
+    Button Search_B{
+        String text := ['Search']
+        event onClick{
+            //TODO: implement the query
+                                        
+            if [($Param_TF.text$.oclIsUndefined()) or
+                ($Param_TF.text$.toInteger().oclIsInvalid()) or
+                ($Param_TF.text$.toInteger() < 0) or
+                ($Role_CB.selected$.oclIsUndefined()) or
+                ($Table_People_T.selected$->oclIsUndefined()) or
+                ($Table_People_T.selected$->size() < 1)]{ 
+                notification(['Error'],['Not implemented'],[500])  
+            } else {
+                //Table_T.rows := [Set{}]
+                //get correct predicate:
+                if[($Events_CB.selected$ = "am attending")]{
+                    Table_T.rows := [$EventQueryWindow.caller$.attends]
+                } else {
+                    if[($Events_CB.selected$ = "was invited")]{
+                        Table_T.rows := [$EventQueryWindow.caller$.invites->collect(i|i.event)->asSet()]
+                    } else {
+                        if[($Events_CB.selected$ = "requested to join")] {
+                            Table_T.rows := [$EventQueryWindow.caller$.requests]
+                        }
+                    }
+                }
+                
+            }
+        }
+    }
+
+    Label Text5_L {
+        String text := ['Results:']
+    }
+    Table Table_T{
+        //TODO: show the result of the query
+        //NOTE: 'Role' below added for compilation purposes
+        //      replace it with the appropriate type
+        Set(Event) rows := [Set{}]
+        columns {
+            ['Title'] : Label title {
+                event onView (text){
+                    try{
+                       //TODO: show the event title
+                    } catch (SecurityException){
+                        text := ['RESTRICTED']
+                    }
+                }
+            }
+        }
+    }
+
+
+    Button Back_B{
+        String text := ['Back']
+        event onClick{
+            back
+        }
+    }
+}
