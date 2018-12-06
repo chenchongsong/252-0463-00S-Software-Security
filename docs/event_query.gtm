@@ -40,7 +40,7 @@ Window EventQueryWindow{
             ['People'] : Label username {
                 event onView (text){
                     try{
-                        text := [$Table_People_T.row$.name + " " + $Table_People_T.row$.surname]
+                        text := [$Table_People_T.row$.name.concat(" ").concat($Table_People_T.row$.surname)]
                     } catch (SecurityException){
                         text := ['RESTRICTED']
                     }
@@ -57,7 +57,6 @@ Window EventQueryWindow{
         //TODO: define all the options
         //NOTE: 'Role' below added for compilation purposes
         //      replace it with the appropriate type
-        
         Set(String) rows := [Set{"attendants", "managers", "owners"}]
         String selected  := [null]
         Label times { 
@@ -73,31 +72,60 @@ Window EventQueryWindow{
     }
     Button Search_B{
         String text := ['Search']
+        Set(Event) first_filter_results := [Set{}]
+        Set(Event) second_filter_results := [Set{}]
+        Set(Person) related_people := [Set{}]
         event onClick{
-            //TODO: implement the query
-                                        
+            //TODO: implement the query                
             if [($Param_TF.text$.oclIsUndefined()) or
                 ($Param_TF.text$.toInteger().oclIsInvalid()) or
                 ($Param_TF.text$.toInteger() < 0) or
                 ($Role_CB.selected$.oclIsUndefined()) or
                 ($Table_People_T.selected$->oclIsUndefined()) or
-                ($Table_People_T.selected$->size() < 1)]{ 
-                notification(['Error'],['Not implemented'],[500])  
+                ($Table_People_T.selected$->size() < 1)] { 
+                notification(['Error'],['Invalid Input'],[500])  
             } else {
-                //Table_T.rows := [Set{}]
-                //get correct predicate:
-                if[($Events_CB.selected$ = "am attending")]{
-                    Table_T.rows := [$EventQueryWindow.caller$.attends]
+                // first filter
+                first_filter_results := [Set{}]
+                if [($Events_CB.selected$ = "am attending")] {
+                    first_filter_results := [$EventQueryWindow.caller$.attends]
                 } else {
-                    if[($Events_CB.selected$ = "was invited")]{
-                        Table_T.rows := [$EventQueryWindow.caller$.invites->collect(i|i.event)->asSet()]
+                    if [($Events_CB.selected$ = "was invited")] {
+                        first_filter_results := [$EventQueryWindow.caller$.invitations->collect(i|i.event)->asSet()]
                     } else {
-                        if[($Events_CB.selected$ = "requested to join")] {
-                            Table_T.rows := [$EventQueryWindow.caller$.requests]
+                        if [($Events_CB.selected$ = "requested to join")] {
+                            first_filter_results := [$EventQueryWindow.caller$.requests]
+                        } else { // nothing selected in First ComboBox
+                            first_filter_results := [Event.allInstances()]
                         }
                     }
                 }
-                
+
+                // second filter
+                second_filter_results := [Set{}]
+                foreach filtered_event in [$first_filter_results$] {
+                    // get related_people with selected role 
+                    related_people := [Set{}]
+                    if [$Role_CB.selected$ = "attendants"]{
+                        related_people := [$filtered_event$.attendants]
+                    } else {
+                        if [($Role_CB.selected$ = "managers")]{
+                            related_people := [$filtered_event$.managedBy]
+                        } else {
+                            if [($Role_CB.selected$ = "owners")] {
+                                related_people := [$filtered_event$.owner->asSet()]
+                            }
+                        }
+                    }
+                    // add filtered_event to the final result if conditions satisfied
+                    if [$Table_People_T.selected$->select(p|$related_people$->includes(p))->size()>=$Param_TF.text$.toInteger()]{
+                        second_filter_results := [$second_filter_results$->union($filtered_event$->asSet())]
+                    }
+                }
+
+                // show results
+                reevaluate Table_T.rows // clear out original events in Table_T
+                Table_T.rows := [$second_filter_results$]
             }
         }
     }
@@ -115,6 +143,7 @@ Window EventQueryWindow{
                 event onView (text){
                     try{
                        //TODO: show the event title
+                       text := [$Table_T.row$.title]
                     } catch (SecurityException){
                         text := ['RESTRICTED']
                     }
@@ -123,7 +152,6 @@ Window EventQueryWindow{
         }
     }
 
-
     Button Back_B{
         String text := ['Back']
         event onClick{
@@ -131,3 +159,4 @@ Window EventQueryWindow{
         }
     }
 }
+
