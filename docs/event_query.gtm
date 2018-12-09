@@ -1,5 +1,14 @@
 Window EventQueryWindow{
 
+    // choice as constant strings
+    String Events_CB_Attend := ["am attending"]
+    String Events_CB_Invited := ["was invited"]
+    String Events_CB_Request := ["requested to join"]
+
+    String Role_CB_Attendant := ["attendants"]
+    String Role_CB_Manager := ["managers"]
+    String Role_CB_Owner := ["owners"]
+    
     Label Text1_L {
         String text := ['Search for all events that I ']
     }
@@ -7,7 +16,11 @@ Window EventQueryWindow{
         //TODO: define all the options
         //NOTE: 'Role' below added for compilation purposes
         //      replace it with the appropriate type
-        Set(String) rows := [Set{"am attending", "was invited","requested to join"}]
+        Set(String) rows := [ Set{
+            $EventQueryWindow.Events_CB_Attend$,
+            $EventQueryWindow.Events_CB_Invited$,
+            $EventQueryWindow.Events_CB_Request$
+        }]
         String selected  := [null]
         Label times { 
             event onView (text) {
@@ -57,7 +70,11 @@ Window EventQueryWindow{
         //TODO: define all the options
         //NOTE: 'Role' below added for compilation purposes
         //      replace it with the appropriate type
-        Set(String) rows := [Set{"attendants", "managers", "owners"}]
+        Set(String) rows := [ Set{
+            $EventQueryWindow.Role_CB_Attendant$,
+            $EventQueryWindow.Role_CB_Manager$,
+            $EventQueryWindow.Role_CB_Owner$
+        }]
         String selected  := [null]
         Label times { 
             event onView (text) {
@@ -87,13 +104,13 @@ Window EventQueryWindow{
             } else {
                 // first filter
                 first_filter_results := [Set{}]
-                if [($Events_CB.selected$ = "am attending")] {
+                if [($Events_CB.selected$ = $EventQueryWindow.Events_CB_Attend$)] {
                     first_filter_results := [$EventQueryWindow.caller$.attends]
                 } else {
-                    if [($Events_CB.selected$ = "was invited")] {
+                    if [($Events_CB.selected$ = $EventQueryWindow.Events_CB_Invited$)] {
                         first_filter_results := [$EventQueryWindow.caller$.invitations->collect(i|i.event)->asSet()]
                     } else {
-                        if [($Events_CB.selected$ = "requested to join")] {
+                        if [($Events_CB.selected$ = $EventQueryWindow.Events_CB_Request$)] {
                             first_filter_results := [$EventQueryWindow.caller$.requests]
                         } else { // nothing selected in First ComboBox
                             first_filter_results := [Event.allInstances()]
@@ -106,13 +123,13 @@ Window EventQueryWindow{
                 foreach filtered_event in [$first_filter_results$] {
                     // get related_people with selected role 
                     related_people := [Set{}]
-                    if [$Role_CB.selected$ = "attendants"]{
+                    if [$Role_CB.selected$ = $EventQueryWindow.Role_CB_Attendant$]{
                         related_people := [$filtered_event$.attendants]
                     } else {
-                        if [($Role_CB.selected$ = "managers")]{
+                        if [($Role_CB.selected$ = $EventQueryWindow.Role_CB_Manager$)]{
                             related_people := [$filtered_event$.managedBy]
                         } else {
-                            if [($Role_CB.selected$ = "owners")] {
+                            if [($Role_CB.selected$ = $EventQueryWindow.Role_CB_Owner$)] {
                                 related_people := [$filtered_event$.owner->asSet()]
                             }
                         }
