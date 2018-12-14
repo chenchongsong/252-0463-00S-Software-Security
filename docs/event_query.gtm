@@ -13,9 +13,6 @@ Window EventQueryWindow{
         String text := ['Search for all events that I ']
     }
     ComboBox Events_CB {
-        //TODO: define all the options
-        //NOTE: 'Role' below added for compilation purposes
-        //      replace it with the appropriate type
         Set(String) rows := [ Set{
             $EventQueryWindow.Events_CB_Attend$,
             $EventQueryWindow.Events_CB_Invited$,
@@ -44,9 +41,6 @@ Window EventQueryWindow{
         String text := ['person/people from the following group']
     }
     Table Table_People_T{
-        //TODO: show all people
-        //NOTE: 'Role' below added for compilation purposes
-        //      replace it with the appropriate type
         Set(Person) rows := [Person.allInstances()]
         Set(Person) selected  := [null]
         columns {
@@ -67,9 +61,6 @@ Window EventQueryWindow{
     }
      
     ComboBox Role_CB {
-        //TODO: define all the options
-        //NOTE: 'Role' below added for compilation purposes
-        //      replace it with the appropriate type
         Set(String) rows := [ Set{
             $EventQueryWindow.Role_CB_Attendant$,
             $EventQueryWindow.Role_CB_Manager$,
@@ -92,8 +83,7 @@ Window EventQueryWindow{
         Set(Event) first_filter_results := [Set{}]
         Set(Event) second_filter_results := [Set{}]
         Set(Person) related_people := [Set{}]
-        event onClick{
-            //TODO: implement the query                
+        event onClick{               
             if [($Param_TF.text$.oclIsUndefined()) or
                 ($Param_TF.text$.toInteger().oclIsInvalid()) or
                 ($Param_TF.text$.toInteger() < 0) or
@@ -102,7 +92,7 @@ Window EventQueryWindow{
                 ($Table_People_T.selected$->size() < 1)] { 
                 notification(['Error'],['Invalid Input'],[500])  
             } else {
-                // first filter
+                // first filter: filter for event status
                 first_filter_results := [Set{}]
                 if [($Events_CB.selected$ = $EventQueryWindow.Events_CB_Attend$)] {
                     first_filter_results := [$EventQueryWindow.caller$.attends]
@@ -118,7 +108,7 @@ Window EventQueryWindow{
                     }
                 }
 
-                // second filter
+                // second filter: filter for event role
                 second_filter_results := [Set{}]
                 foreach filtered_event in [$first_filter_results$] {
                     // get related_people with selected role 
@@ -151,9 +141,6 @@ Window EventQueryWindow{
         String text := ['Results:']
     }
     Table Table_T{
-        //TODO: show the result of the query
-        //NOTE: 'Role' below added for compilation purposes
-        //      replace it with the appropriate type
         Set(Event) rows := [Set{}]
         columns {
             ['Title'] : Label title {
