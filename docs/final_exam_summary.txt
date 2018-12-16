@@ -1,0 +1,85 @@
+constrainedBy
+Bool:  ->isEmpty()
+Set :  ->intersection(Set...)
+Bool:  ->exists(i|i.event=target)
+       ->collect(i|i.event)->asSet()
+T(all):->select(i|i.event=target)
+T(any):->any(i|i.event=target)
+
+
+:= [Person.allInstances()]
+:= [null]
+
+try{
+    text := [$Table_People_T.row$.name]
+} catch (SecurityException){}
+
+
+first_filter_results := [Set{}]
+foreach filtered_event in [$first_filter_results$] {
+}
+
+
+:= [$Param_TF.text$.toInteger()]
+[$Window.caller$]
+
+EventQueryWindow.Events_CB_Attend := ["test2"]
+Text4_L.text := ["100"]
+Table_T.rows := [null]
+reevaluate Table_T.rows
+
+newEvent := new Event
+[$newEvent$.title] := ["test"]
+
+delete [$Table_Inv_T.selected$]
+[$UserEventWindow.entity$.attends] += [$Table_Inv_T.selected$.event]
+[$Table_T.selected$.subscribers]-=[$CategoryListWindow.caller$]
+
+
+cases require [$ $] on left side
+1. delete
+2. new
+3. Set += -=
+4. Window.entity
+
+
+
+Security Coding
+a. buffer overflow
+1. avoid C++/C
+2. insert a canary
+3. array bounds checking
+4. defensive programming: e.g. use fgets not gets
+5. randomizing memory layout
+
+b. format strings
+1. carefull programming
+2. detection done by analysis tools
+3. use weaker libraries
+
+c1. name (subdirectory jail by chroot)
+c2. link (user lstat to check link/file)
+c3. race (use atomic operation to combine)
+
+d. sql injection
+1. prepared statements
+2. input validation
+
+e. xss (stored and reflected)
+1. disable javascript
+2. input validation: prevent malicious inputs
+3. output validation (encoding)
+4. HttpOnly flag is set -> at client side, cookies will not be revealed
+5. Content Security Policy: trust only javascripts related to whitelisted sources / sites
+(https://www.zhihu.com/question/21979782)
+
+f. authentication
+1. captcha
+2. SSL/TLS
+
+
+
+
+
+
+
